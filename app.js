@@ -1,6 +1,8 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
+const cors = require('cors');
+
 const bcrypt = require('bcrypt');
 
 const app = express();
@@ -18,6 +20,9 @@ db.serialize(() => {
 
 // Configure body-parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors({
+  origin: '*'
+}));
 app.use(bodyParser.json());
 
 // Login API
@@ -28,10 +33,12 @@ app.post('/login', (req, res) => {
   db.get('SELECT * FROM users WHERE email = ?', email, (err, row) => {
     if (err) {
       console.error(err.message);
+      res.header('Access-Control-Allow-Origin', '*');
       return res.status(500).json({ error: 'Internal server error' });
     }
 
     if (!row) {
+      res.header('Access-Control-Allow-Origin', '*');
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
@@ -39,10 +46,12 @@ app.post('/login', (req, res) => {
     bcrypt.compare(password, row.password, (bcryptErr, result) => {
       if (bcryptErr) {
         console.error(bcryptErr.message);
+        res.header('Access-Control-Allow-Origin', '*');
         return res.status(500).json({ error: 'Internal server error' });
       }
 
       if (!result) {
+        res.header('Access-Control-Allow-Origin', '*');
         return res.status(401).json({ error: 'Invalid email or password' });
       }
 
@@ -58,6 +67,8 @@ app.post('/register', (req, res) => {
 
   // Check if password and confirm password match
   if (password !== confirmPassword) {
+        res.header('Access-Control-Allow-Origin', '*');
+
     return res.status(400).json({ error: 'Password and confirm password do not match' });
   }
 
@@ -65,6 +76,8 @@ app.post('/register', (req, res) => {
   bcrypt.hash(password, 10, (err, hashedPassword) => {
     if (err) {
       console.error(err.message);
+          res.header('Access-Control-Allow-Origin', '*');
+
       return res.status(500).json({ error: 'Internal server error' });
     }
 
@@ -75,6 +88,8 @@ app.post('/register', (req, res) => {
       (dbErr) => {
         if (dbErr) {
           console.error(dbErr.message);
+              res.header('Access-Control-Allow-Origin', '*');
+
           return res.status(500).json({ error: 'Internal server error' });
         }
 
@@ -93,9 +108,12 @@ app.listen(PORT, () => {
 app.get('/users', (req, res) => {
   db.all('SELECT * FROM users', (err, rows) => {
     if (err) {
+      res.header('Access-Control-Allow-Origin', '*');
+
       console.error(err.message);
       return res.status(500).json({ error: 'Internal server error' });
     }
+    res.header('Access-Control-Allow-Origin', '*');
 
     res.json({ users: rows });
   });
