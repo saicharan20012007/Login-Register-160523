@@ -9,7 +9,7 @@ const app = express();
 const PORT = 4000;
 
 // Create SQLite database connection
-const db = new sqlite3.Database(':memory:');
+const db = new sqlite3.Database('./database.db');
 
 // Create users table
 db.serialize(() => {
